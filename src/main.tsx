@@ -62,9 +62,11 @@ export default class FabPlugin extends Plugin {
     this.settings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData());
   }
 
-  async saveSettings(): Promise<void> {
+  saveSettings = debounce(async (): Promise<void> => {
     await this.saveData(this.settings);
-  }
+
+    this.render();
+  }, DEBOUNCE);
 
   private render(mode = this.getActiveViewMode()): void {
     const root = this.getOrCreateRootElement();
@@ -148,6 +150,7 @@ class FabSettingTab extends PluginSettingTab {
 
     new Setting(containerEl).setName('Margin').addSlider((slider) =>
       slider
+        .setValue(this.plugin.settings.margin)
         .setLimits(MIN_MARGIN, MAX_MARGIN, 'any')
         .onChange(async (value) => {
           this.plugin.settings.margin = parseMargin(value);
@@ -158,6 +161,7 @@ class FabSettingTab extends PluginSettingTab {
     new Setting(containerEl).setName('Position').addDropdown((dropdown) => {
       dropdown
         .addOptions({ bottomLeft: 'Bottom Left', bottomRight: 'Bottom Right' })
+        .setValue(this.plugin.settings.position)
         .onChange(async (value) => {
           this.plugin.settings.position = parsePosition(value);
           await this.plugin.saveSettings();
