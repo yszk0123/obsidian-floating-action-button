@@ -1,69 +1,61 @@
 import {
   App,
-  Modal,
-  Notice,
+  debounce,
+  MarkdownView,
   Plugin,
   PluginSettingTab,
   Setting,
 } from 'obsidian';
+import React from 'react';
+import ReactDOM from 'react-dom';
 
-interface MyPluginSettings {
-  mySetting: string;
+import { PLUGIN_ID, PLUGIN_NAME, ROOT_ELEMENT_ID } from './constants';
+import { App as AppContaier } from './containers/App';
+import { MAX_MARGIN, MIN_MARGIN, parseMargin } from './models/Margin';
+import { Mode, toggleMode } from './models/Mode';
+import { parsePosition, Position } from './models/Position';
+
+const DEBOUNCE = 200;
+
+interface FabPluginSettings {
+  margin: number;
+  position: Position;
 }
 
-const DEFAULT_SETTINGS: MyPluginSettings = {
-  mySetting: 'default',
+const DEFAULT_SETTINGS: FabPluginSettings = {
+  margin: 32,
+  position: 'bottomRight',
 };
 
-export default class MyPlugin extends Plugin {
-  settings!: MyPluginSettings;
+export default class FabPlugin extends Plugin {
+  settings!: FabPluginSettings;
 
   async onload(): Promise<void> {
-    console.log('loading plugin');
+    console.log(`loading ${PLUGIN_ID} plugin`);
 
     await this.loadSettings();
 
-    this.addRibbonIcon('dice', 'Sample Plugin', () => {
-      new Notice('This is a notice!');
+    this.addSettingTab(new FabSettingTab(this.app, this));
+
+    this.app.workspace.onLayoutReady(() => {
+      this.render();
     });
 
-    this.addStatusBarItem().setText('Status Bar Text');
-
-    this.addCommand({
-      // callback: () => {
-      // 	console.log('Simple Callback');
-      // },
-      checkCallback: (checking: boolean) => {
-        const leaf = this.app.workspace.activeLeaf;
-        if (leaf != null) {
-          if (!checking) {
-            new SampleModal(this.app).open();
-          }
-          return true;
-        }
-        return false;
-      },
-      id: 'open-sample-modal',
-      name: 'Open Sample Modal',
+    this.app.workspace.on('active-leaf-change', () => {
+      this.render();
     });
 
-    this.addSettingTab(new SampleSettingTab(this.app, this));
-
-    this.registerCodeMirror((cm: CodeMirror.Editor) => {
-      console.log('codemirror', cm);
-    });
-
-    this.registerDomEvent(document, 'click', (evt: MouseEvent) => {
-      console.log('click', evt);
-    });
-
-    this.registerInterval(
-      window.setInterval(() => console.log('setInterval'), 5 * 60 * 1000)
+    this.app.workspace.on(
+      'layout-change',
+      debounce(() => {
+        this.render();
+      }, DEBOUNCE)
     );
   }
 
   onunload(): void {
-    console.log('unloading plugin');
+    console.log(`unloading ${PLUGIN_ID} plugin`);
+    this.cleanup();
   }
 
   async loadSettings(): Promise<void> {
@@ -73,28 +65,76 @@ export default class MyPlugin extends Plugin {
   async saveSettings(): Promise<void> {
     await this.saveData(this.settings);
   }
+
+  private render(mode = this.getActiveViewMode()): void {
+    const root = this.getOrCreateRootElement();
+    ReactDOM.render(
+      <AppContaier
+        margin={this.settings.margin}
+        mode={mode}
+        position={this.settings.position}
+        onClick={this.handleClick}
+      />,
+      root
+    );
+  }
+
+  private cleanup(): void {
+    this.removeRootElement();
+  }
+
+  private handleClick = () => {
+    this.toggleMode();
+  };
+
+  private toggleMode(): void {
+    const view = this.app.workspace.getActiveViewOfType(MarkdownView);
+    if (view === null) {
+      return;
+    }
+
+    const viewState = view.leaf.getViewState();
+    const mode = view.getMode();
+
+    const newMode = toggleMode(mode);
+    const newViewState = {
+      ...viewState,
+      state: {
+        ...viewState.state,
+        mode: newMode,
+      },
+    };
+
+    view.leaf.setViewState(newViewState);
+  }
+
+  private getActiveViewMode(): Mode | null {
+    const view = this.app.workspace.getActiveViewOfType(MarkdownView);
+    return view?.getMode() ?? null;
+  }
+
+  private getOrCreateRootElement(): HTMLElement {
+    const root = document.getElementById(ROOT_ELEMENT_ID);
+    if (root !== null) {
+      return root;
+    }
+
+    const newRoot = document.createElement('div');
+    newRoot.id = ROOT_ELEMENT_ID;
+    document.body.appendChild(newRoot);
+    return newRoot;
+  }
+
+  private removeRootElement(): void {
+    const root = document.getElementById(ROOT_ELEMENT_ID);
+    root?.empty();
+  }
 }
 
-class SampleModal extends Modal {
-  constructor(app: App) {
-    super(app);
-  }
+class FabSettingTab extends PluginSettingTab {
+  plugin: FabPlugin;
 
-  onOpen() {
-    const { contentEl } = this;
-    contentEl.setText('Woah!');
-  }
-
-  onClose() {
-    const { contentEl } = this;
-    contentEl.empty();
-  }
-}
-
-class SampleSettingTab extends PluginSettingTab {
-  plugin: MyPlugin;
-
-  constructor(app: App, plugin: MyPlugin) {
+  constructor(app: App, plugin: FabPlugin) {
     super(app, plugin);
     this.plugin = plugin;
   }
@@ -104,20 +144,24 @@ class SampleSettingTab extends PluginSettingTab {
 
     containerEl.empty();
 
-    containerEl.createEl('h2', { text: 'Settings for my awesome plugin.' });
+    containerEl.createEl('h2', { text: `${PLUGIN_NAME} Settings` });
 
-    new Setting(containerEl)
-      .setName('Setting #1')
-      .setDesc("It's a secret")
-      .addText((text) =>
-        text
-          .setPlaceholder('Enter your secret')
-          .setValue('')
-          .onChange(async (value) => {
-            console.log('Secret: ' + value);
-            this.plugin.settings.mySetting = value;
-            await this.plugin.saveSettings();
-          })
-      );
+    new Setting(containerEl).setName('Margin').addSlider((slider) =>
+      slider
+        .setLimits(MIN_MARGIN, MAX_MARGIN, 'any')
+        .onChange(async (value) => {
+          this.plugin.settings.margin = parseMargin(value);
+          await this.plugin.saveSettings();
+        })
+    );
+
+    new Setting(containerEl).setName('Position').addDropdown((dropdown) => {
+      dropdown
+        .addOptions({ bottomLeft: 'Bottom Left', bottomRight: 'Bottom Right' })
+        .onChange(async (value) => {
+          this.plugin.settings.position = parsePosition(value);
+          await this.plugin.saveSettings();
+        });
+    });
   }
 }
