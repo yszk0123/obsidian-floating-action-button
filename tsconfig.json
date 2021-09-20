@@ -1,22 +1,19 @@
 {
   "compilerOptions": {
-    "baseUrl": ".",
     "inlineSourceMap": true,
     "inlineSources": true,
+    "jsx": "react",
     "module": "ESNext",
     "target": "es6",
     "allowJs": true,
+    "esModuleInterop": true,
+    "noUncheckedIndexedAccess": true,
     "noImplicitAny": true,
     "moduleResolution": "node",
     "importHelpers": true,
-    "lib": [
-      "dom",
-      "es5",
-      "scripthost",
-      "es2015"
-    ]
+    "lib": ["dom", "es5", "scripthost", "es2015"],
+    "forceConsistentCasingInFileNames": true,
+    "strict": true
   },
-  "include": [
-    "**/*.ts"
-  ]
+  "include": ["src/**/*.ts", "src/**/*.tsx", "tools/**/*.mjs", "*.mjs"]
 }

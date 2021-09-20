@@ -1,32 +1,12 @@
-## Obsidian Sample Plugin
+## Obsidian Floating Action Button
 
-This is a sample plugin for Obsidian (https://obsidian.md).
+An Obsidian plugin that displays a floating action button to switch between preview and edit modes.
 
-This project uses Typescript to provide type checking and documentation.
-The repo depends on the latest plugin API (obsidian.d.ts) in Typescript Definition format, which contains TSDoc comments describing what it does.
+**This plugin is still under development and is not yet available in the Obsidian plugin store.**
 
-**Note:** The Obsidian API is still in early alpha and is subject to change at any time!
-
-This sample plugin demonstrates some of the basic functionality the plugin API can do.
-- Changes the default font color to red using `styles.css`.
-- Adds a ribbon icon, which shows a Notice when clicked.
-- Adds a command "Open Sample Modal" which opens a Modal.
-- Adds a plugin setting tab to the settings page.
-- Registers a global click event and output 'click' to the console.
-- Registers a global interval which logs 'setInterval' to the console.
-
-### First time developing plugins?
-
-Quick starting guide for new plugin devs:
-
-- Make a copy of this repo as a template with the "Use this template" button (login to GitHub if you don't see it).
-- Clone your repo to a local development folder. For convenience, you can place this folder in your `.obsidian/plugins/your-plugin-name` folder.
-- Install NodeJS, then run `npm i` in the command line under your repo folder.
-- Run `npm run dev` to compile your plugin from `main.ts` to `main.js`.
-- Make changes to `main.ts` (or create new `.ts` files). Those changes should be automatically compiled into `main.js`.
-- Reload Obsidian to load the new version of your plugin.
-- Enable plugin in settings window.
-- For updates to the Obsidian API run `npm update` in the command line under your repo folder.
+| Preview                        | Edit                     |
+| ------------------------------ | ------------------------ |
+| ![preview](assets/preview.png) | ![edit](assets/edit.png) |
 
 ### Releasing new releases
 
@@ -45,8 +25,8 @@ Quick starting guide for new plugin devs:
 ### How to use
 
 - Clone this repo.
-- `npm i` or `yarn` to install dependencies
-- `npm run dev` to start compilation in watch mode.
+- `yarn` to install dependencies
+- `yarn dev` to start compilation in watch mode.
 
 ### Manually installing the plugin
 

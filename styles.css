@@ -1,4 +1,22 @@
-/* Sets all the text color to red! */
-body {
-    color: red;
+:root {
+  --fab-button-size: 48px;
+  --fab-default-margin: 32px;
+  --fab-space: 4px;
+}
+
+.fab-FloatingActionButton {
+  align-items: center;
+  background-color: var(--background-button);
+  border-radius: 50%;
+  bottom: var(--fab-default-margin);
+  box-shadow: 0 0 8px var(--background-modifier-box-shadow);
+  display: flex;
+  height: var(--fab-button-size);
+  justify-content: center;
+  margin: 0;
+  padding: calc(var(--fab-space) * 2);
+  position: fixed;
+  right: var(--fab-default-margin);
+  width: var(--fab-button-size);
+  z-index: var(--layer-status-bar);
 }
