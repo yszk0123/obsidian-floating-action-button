@@ -62,9 +62,9 @@ export default class FabPlugin extends Plugin {
     this.settings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData());
   }
 
-  async saveSettings(): Promise<void> {
+  saveSettings = debounce(async (): Promise<void> => {
     await this.saveData(this.settings);
-  }
+  }, DEBOUNCE);
 
   private render(mode = this.getActiveViewMode()): void {
     const root = this.getOrCreateRootElement();
