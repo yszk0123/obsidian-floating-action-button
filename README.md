@@ -1,3 +1,14 @@
+# Deprecated
+
+This plugin has been deprecated. Instead, we recommend using CSS snippets or a theme.
+
+- CSS snippet:
+  - https://forum.obsidian.md/t/adding-floating-action-button-fab-for-your-mobile-using-css/61388/
+- How to add your own CSS snippet:
+  - https://help.obsidian.md/Extending+Obsidian/CSS+snippets
+- Obsidian theme that supports FAB:
+  - https://github.com/selfire1/obsidian-you-theme
+
 ## Obsidian Floating Action Button
 
 An Obsidian plugin that displays a floating action button to switch between preview and edit modes.
@@ -35,3 +46,7 @@ An Obsidian plugin that displays a floating action button to switch between prev
 ### API Documentation
 
 See https://github.com/obsidianmd/obsidian-api
+
+## Contributors
+
+- @witecat
